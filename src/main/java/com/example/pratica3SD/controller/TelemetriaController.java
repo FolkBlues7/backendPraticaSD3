@@ -97,4 +97,41 @@ public class TelemetriaController {
 
         return ResponseEntity.ok(dispositivos);
     }
+
+    // 9. Retorna todos os alertas de um laboratório específico
+    @GetMapping("/alertas/laboratorios/{idLab}")
+    public ResponseEntity<List<Telemetria>> listarAlertasPorLaboratorio(@PathVariable String idLab) {
+
+        // Padroniza a entrada do laboratório (ex: "3" vira "LAB-3-")
+        String prefixoBusca = idLab.toUpperCase();
+        if (!prefixoBusca.startsWith("LAB-")) {
+            prefixoBusca = "LAB-" + prefixoBusca;
+        }
+        if (!prefixoBusca.endsWith("-")) {
+            prefixoBusca = prefixoBusca + "-";
+        }
+
+        List<Telemetria> alertas = repository.findAlertsByLaboratorio(prefixoBusca);
+        return ResponseEntity.ok(alertas);
+    }
+
+    // 10. Retorna todos os alertas de um dispositivo específico
+    @GetMapping("/alertas/dispositivos/{nome}")
+    public ResponseEntity<List<Telemetria>> listarAlertasPorDispositivo(@PathVariable String nome) {
+        List<Telemetria> alertas = repository.findAlertsByDispositivo(nome);
+        return ResponseEntity.ok(alertas);
+    }
+
+    // 11. Retorna o ÚLTIMO alerta geral do sistema (O mais recente)
+    @GetMapping("/alertas/ultimo")
+    public ResponseEntity<Telemetria> obterUltimoAlerta() {
+        Telemetria ultimoAlerta = repository.findLatestAlert();
+
+        if (ultimoAlerta == null) {
+            // Se não houver nenhum alerta no banco, retorna 404 Not Found ou 204 No Content
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(ultimoAlerta);
+    }
 }

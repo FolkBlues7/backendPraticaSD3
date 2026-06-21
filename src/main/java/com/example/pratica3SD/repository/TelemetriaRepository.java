@@ -27,4 +27,16 @@ public interface TelemetriaRepository extends JpaRepository<Telemetria, Long> {
 
     @Query(value = "SELECT DISTINCT ON (nome) * FROM telemetria WHERE nome LIKE CONCAT(:prefixo, '%') ORDER BY nome, timestamp DESC", nativeQuery = true)
     List<Telemetria> findLatestByLaboratorioNome(@Param("prefixo") String prefixo);
+
+    // Retorna todos os alertas de um laboratório específico
+    @Query(value = "SELECT * FROM telemetria WHERE nome LIKE CONCAT(:prefixo, '%') AND (temperatura > 85 OR evento_seguranca IN ('UNAUTHORIZED_SOFTWARE', 'MISUSE')) ORDER BY timestamp DESC", nativeQuery = true)
+    List<Telemetria> findAlertsByLaboratorio(@Param("prefixo") String prefixo);
+
+    // Retorna todos os alertas de um único dispositivo
+    @Query(value = "SELECT * FROM telemetria WHERE nome = :nome AND (temperatura > 85 OR evento_seguranca IN ('UNAUTHORIZED_SOFTWARE', 'MISUSE')) ORDER BY timestamp DESC", nativeQuery = true)
+    List<Telemetria> findAlertsByDispositivo(@Param("nome") String nome);
+
+    // Retorna o ÚLTIMO alerta gerado em toda a universidade
+    @Query(value = "SELECT * FROM telemetria WHERE temperatura > 85 OR evento_seguranca IN ('UNAUTHORIZED_SOFTWARE', 'MISUSE') ORDER BY timestamp DESC LIMIT 1", nativeQuery = true)
+    Telemetria findLatestAlert();
 }

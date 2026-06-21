@@ -1,6 +1,8 @@
+version: '3.8'
+
 services:
   postgres-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: postgres-pratica3
     environment:
       - POSTGRES_DB=testdb
@@ -9,9 +11,29 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-pratica3
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=12345
+    ports:
+      - "5672:5672"   # Porta principal de comunicação AMQP
+      - "15672:15672" # Porta da interface visual (Painel de Administração)
+    restart: always
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto-pratica3
+    ports:
+      - "1883:1883"
+      - "9001:9001" # Porta para WebSockets (útil para o frontend depois)
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
     restart: always
 
 volumes:
   postgres_data:
-
